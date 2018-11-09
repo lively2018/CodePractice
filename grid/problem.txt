@@ -1,0 +1,76 @@
+
+Example 2.
+
+z z z z
+
+z z b z
+
+h z e z
+
+a z z z
+
+ 
+
+Contains the words "be", "ha", and "ah". It should not contain "bee" or "ebb" or "he" or "hah".
+
+ 
+
+Example 3.
+
+ 
+
+Grid: abanbxdoanxxxxxx
+
+Word found (one of many): abandon
+
+ 
+
+Letters forming "abandon" are shown in bold and underlined and each letter used has a superscript showing the order in which the letters are used.
+
+a1  b   a   n7
+
+b2  x   d5  o6
+
+a3  n4  x   x
+
+x   x   x   x
+
+ 
+
+Implementation Details
+
+======================
+
+Your program should not print any word more than once. Your program can assume that the word list file contains no duplicated words and that the input arguments are valid.
+
+ 
+
+Your program should be tolerant of word files that contain a mixture of upper and lower case words and of words that contain punctuation. Your program can deal with such words in some reasonable way. Note that different word list files can be alphabetized differently.
+
+ 
+
+If you use C++, we ask that you do not use the Standard Template Library containers and iterators; we would like to see your own data structures and algorithms. (Exception: you can use std::string.)
+
+ 
+
+Please do not copy or examine any of your or other people's existing code while writing this program. Please write it from scratch.  We realize your program will just be a prototype. We do not expect this to be production quality software, nor is it embedded code (you need not restrict yourself to embedded programming practices.)
+
+ 
+
+Work quickly, but accurately because we take into consideration how fast you're able to write the program. However, the most important thing is to make sure your program works correctly.
+
+ 
+
+Strive for simplicity in your code and data structures. A simple, concise program is more impressive than a long, complicated one and also easier to write quickly.  Execution speed of your program is only a concern if it runs so slowly as to make testing with many different grids impractical.  The program should take a few seconds to process a grid at most.
+
+ 
+
+Don't spend a significant amount of time writing comments.
+
+ 
+
+Please plan to finish within 4 hours.
+
+ 
+
+Good luck, and be sure to let me know if you have questions.
