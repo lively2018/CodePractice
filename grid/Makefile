@@ -1,6 +1,6 @@
 grid: grid.o
-	gcc -o grid main.o
+	gcc -o grid grid.o
 grid.o:
-	gcc -c main.c
+	gcc -c grid.c
 clean:
-	rm grid main.o
+	rm grid grid.o 
