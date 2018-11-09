@@ -1,4 +1,4 @@
-#define LOG_MSG 0
+#define LOG_MSG 1
 
 #include <stdio.h>
 #include <string.h>
@@ -17,7 +17,6 @@ typedef struct node{
     char * token;
     int length;
     struct node * next;
-    struct node * prev;
 }node_t;
 
 const int dist_grid[4][4] = { {0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
@@ -29,7 +28,7 @@ typedef struct linkedlist{
     int nodeNum;
 }linkedlist_t;
 
-linkedlist_t distSringListOne;
+linkedlist_t distStringListOne;
 
 
 
@@ -38,7 +37,6 @@ int nodeNum = 0;
 static node_t * createNode(char * newString, int length)
 {
     node_t *list;
-    char * string;
     list = malloc(sizeof(node_t));
     if(list == NULL)
     {
@@ -46,11 +44,10 @@ static node_t * createNode(char * newString, int length)
     }
     else
     {
-        list->token = malloc(length+1);
+        list->token = (char*)malloc(length+1);
         strcpy(list->token, newString);
         list->length = length;
-        list-> next = NULL;
-        list-> prev = NULL;
+        list->next = NULL;
     }
 	return list;
 }
@@ -59,7 +56,6 @@ static void insertNode(node_t *list, linkedlist_t *linkedlist)
 {
     node_t *current;
     node_t *temp;
-    
     /* The number of nodes is zero */
     if(linkedlist->head == NULL)
     {
@@ -68,39 +64,67 @@ static void insertNode(node_t *list, linkedlist_t *linkedlist)
     }
     else 
     {
+        current = linkedlist->head;
         do   
         {
             /* find the location to insert new node */
-            current = linkedlist->head;
-            if(strcmp(current->token, list-> token) != 0)
+            if(strcmp(current->token, list->token) != 0)
             {
+				DEBUG_PRINT("current: %s list:%s \n", current->token, list->token);
                 /* insert new node after tail */
                 linkedlist->tail->next = list;
-                list->prev = linkedlist->tail;
                 linkedlist->tail = list;
                 linkedlist->nodeNum++;
                 current = linkedlist->tail;
             }
+			else
+			{
+				DEBUG_PRINT("current: %s list:%s \n", current->token, list->token);
+				free(list);
+				current = linkedlist->tail;
+			}
+
             current = current->next;
         }while(current != NULL);
     }
 }
+void print_list(linkedlist_t *pList)
+{
+	node_t *current;
+	do
+	{
+		current = pList->head;
+		if(current != NULL)
+		{
+			printf("%s\n", current->token);
+		}
+		current = current->next;
+	}while(current != NULL);
 
+}
 void create_distanceOne_stringList(void)
 {
     node_t *list = NULL;
-    char one;
-
+    char one[8];
     int i, j; 
+
+	distStringListOne.head = NULL;
+	distStringListOne.tail = NULL;
+	distStringListOne.nodeNum = 0;
+
+
     for(i = 0; i < 4; ++i)
     {
         for(j = 0; j < 4; ++j)
         {
-            one = char_grid[i][j];
-            list = createNode(&one, 1);
-            insertNode(list, &distSringListOne);
+			memset(one, 0x00, sizeof(one));
+            sprintf(one,"%c", char_grid[i][j]);
+            list = createNode(one, strlen(one));
+			DEBUG_PRINT("%s",list->token);
+            insertNode(list, &distStringListOne);
         }
     }
+//	print_list(&distStringListOne);
 }
  
 void make_string_list(void)
