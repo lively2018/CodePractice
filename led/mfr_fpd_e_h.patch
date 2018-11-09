@@ -1,0 +1,365 @@
+Index: git/Makefile.am
+===================================================================
+--- git.orig/Makefile.am	2017-03-24 21:11:07.978416538 +0900
++++ git/Makefile.am	2017-03-24 21:11:38.318417110 +0900
+@@ -12,7 +12,8 @@
+     dshallogger.c \
+     dsHdmiIn.c \
+     nscclient.c \
+-    mfr_hdmi_in.c
++    mfr_hdmi_in.c \
++    mfr_fpd_hmx.c
+ 
+ include ${PKG_CONFIG_SYSROOT_DIR}/usr/include/platform_app.inc
+ 
+Index: git/dsFPD.c
+===================================================================
+--- git.orig/dsFPD.c	2017-02-23 05:41:26.387248981 +0900
++++ git/dsFPD.c	2017-03-24 21:13:26.662419156 +0900
+@@ -13,16 +13,22 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include "dsFPD.h"
+-#include "fpd_defs.h"
+-#include "mfr_fpd.h"
+ #include "nexus_platform.h"
+ #ifdef HAS_NO_FPD_API_SUPPORT
+ #include "nexus_types.h"
+ #include "nexus_led.h"
++#else
++#include "mfr_fpd_hmx.h"
++#include "dsFPDSettings.h"
+ #endif
+ 
+-#ifdef RDK_USE_NXCLIENT
+-#include "nxclient.h"
++#ifdef FPD_DEBUG
++#include "dshallogger.h"
++#else
++#define DEBUG(...)
++#define ERROR(...)
++#define WARN(...)
++#define INFO(...)
+ #endif
+ 
+ /*Enable HAS_NO_FPD_API_SUPPORT to develop DS HAL , if OEM is not ready with MFR FPD libs.*/
+@@ -30,6 +36,10 @@
+     #define HAS_FPD_API_SUPPORT
+ #endif
+ 
++#ifdef RDK_USE_NXCLIENT
++#include "nxclient.h"
++#endif
++
+ static bool m_isPlatFpdInitialized = false;
+ 
+ #ifdef HAS_NO_FPD_API_SUPPORT
+@@ -56,14 +66,12 @@
+ 
+ FPD_INDICATOR getIndicatorID (dsFPDIndicator_t dsFPDId)
+ {
+-    FPD_INDICATOR indicator = FPD_INDICATOR_RFBYPASS;
++    FPD_INDICATOR indicator = FPD_INDICATOR_POWER;
+     switch (dsFPDId)
+     {
+-        case dsFPD_INDICATOR_MESSAGE: indicator = FPD_INDICATOR_MESSAGE; break;
+         case dsFPD_INDICATOR_POWER: indicator = FPD_INDICATOR_POWER; break;
+-        case dsFPD_INDICATOR_RECORD: indicator = FPD_INDICATOR_RECORD; break;
+-        case dsFPD_INDICATOR_REMOTE: indicator = FPD_INDICATOR_REMOTE; break; 
+-		case dsFPD_INDICATOR_RFBYPASS: indicator = FPD_INDICATOR_RFBYPASS; break; 
++        case dsFPD_INDICATOR_POWER: indicator = FPD_INDICATOR_NETWORK; break;
++        case dsFPD_INDICATOR_POWER: indicator = FPD_INDICATOR_WIFI; break;
+ 		default: break;
+     }
+     return indicator;
+@@ -79,6 +87,7 @@
+         case dsFPD_COLOR_RED     : colorID = FPD_COLOR_RED; break;
+         case dsFPD_COLOR_YELLOW  : colorID = FPD_COLOR_YELLOW; break; 
+         case dsFPD_COLOR_ORANGE  : colorID = FPD_COLOR_ORANGE; break;
++        case dsFPD_COLOR_WHITE   : colorID = FPD_COLOR_WHITE; break;
+         default: break;
+     }
+     return colorID;
+@@ -91,15 +100,15 @@
+     FPD_API_RESULT ret = FPD_API_RESULT_SUCCESS;
+ 
+     if (!m_isPlatFpdInitialized) {
+-    ret = FPD_Init();
++    	ret = FPD_Init();
+ 
+-    if (FPD_API_RESULT_SUCCESS == ret)
+-    m_isPlatFpdInitialized = true;
+-    else
+-    printf("Front panel init failed\n");
++    	if (FPD_API_RESULT_SUCCESS == ret)
++    		m_isPlatFpdInitialized = true;
++    	else
++    		ERROR("Front panel init failed\n");
+     }
+     else
+-    printf("Front panel already inited\n");
++    	INFO("Front panel already inited\n");
+ 
+     return mapFPDReturnCodes(ret);
+ 
+@@ -116,17 +125,17 @@
+     FPD_API_RESULT ret = FPD_API_RESULT_FAILED;
+     if (m_isPlatFpdInitialized)
+        ret = FPD_DeInit();
+-	else
+-        return dsERR_INVALID_STATE;
++    else
++       return dsERR_INVALID_STATE;
+ 
+     if (FPD_API_RESULT_SUCCESS == ret)
+     {
+-        printf("Front Panel uninited successfully\n");
++        INFO("Front Panel uninited successfully\n");
+         m_isPlatFpdInitialized = false;
+     }
+     else
+     {
+-        printf ("Failed to uninit Front Panel\n");
++        ERROR("Failed to uninit Front Panel\n");
+     }
+ 
+     return mapFPDReturnCodes(ret);
+@@ -142,10 +151,10 @@
+     if (!m_isPlatFpdInitialized)
+         return dsERR_INVALID_STATE;
+ 
+-    /*printf ("LED[%d] blink %d times for %d long\n", eIndicator, uBlinkIterations, uBlinkDuration);*/
++    DEBUG("LED[%d] blink %d times for %d long\n", eIndicator, uBlinkIterations, uBlinkDuration);
+     FPD_API_RESULT ret = FPD_SetBlink (getIndicatorID(eIndicator), uBlinkDuration, uBlinkIterations);
+ 
+-	//printf ("%d : ret value...\n", ret);
++    DEBUG("%d : ret value...\n", ret);
+     return mapFPDReturnCodes(ret);
+ #else
+     return dsERR_OPERATION_NOT_SUPPORTED;
+@@ -165,13 +174,13 @@
+         if (eBrightness > dsFPD_BRIGHTNESS_MAX)
+             return dsERR_INVALID_PARAM;
+ 
+-        /*printf ("LED[%d]-%d brightness = %d\n", eIndicator,getIndicatorID(eIndicator), eBrightness);*/
++        DEBUG("LED[%d]-%d brightness = %d\n", eIndicator,getIndicatorID(eIndicator), eBrightness);
+         
+-		FPD_API_RESULT ret = FPD_SetBrightness (getIndicatorID(eIndicator), eBrightness);
++	FPD_API_RESULT ret = FPD_SetBrightness (getIndicatorID(eIndicator), eBrightness);
+ 
+-		//printf ("%d : ret value...\n", ret);
++	DEBUG("%d : ret value...\n", ret);
+ 
+-		return mapFPDReturnCodes(ret);
++	return mapFPDReturnCodes(ret);
+     }
+     else
+         return dsERR_INVALID_PARAM;
+@@ -200,7 +209,7 @@
+             return dsERR_INVALID_PARAM;
+ 
+         FPD_API_RESULT ret = FPD_GetBrightness(getIndicatorID(eIndicator), (FPD_BRIGHTNESS*) pBrightness);
+-       //printf ("%d : ret value...\n", ret);
++        DEBUG("%d : ret value...\n", ret);
+ 
+         return mapFPDReturnCodes(ret);
+ 
+@@ -214,6 +223,48 @@
+ #endif   
+ }
+ 
++dsError_t dsGetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t* state)
++{
++#ifdef HAS_FPD_API_SUPPORT
++    if (!m_isPlatFpdInitialized)
++        return dsERR_INVALID_STATE;
++
++    if (eIndicator < dsFPD_INDICATOR_MAX)
++    {
++        FPD_API_RESULT ret = FPD_GetState(getIndicatorID(eIndicator), (bool*)state);
++        DEBUG("%s - State = %d, ret = %d\n", __FUNCTION__, *state, ret);
++        return mapFPDReturnCodes(ret);
++    }
++    else
++    {
++        return dsERR_INVALID_PARAM;
++    }
++    else
++        return dsERR_OPERATION_NOT_SUPPORTED;
++#endif
++}
++
++dsError_t dsSetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t state)
++{
++#ifdef HAS_FPD_API_SUPPORT
++    if (!m_isPlatFpdInitialized)
++        return dsERR_INVALID_STATE;
++
++    if (eIndicator < dsFPD_INDICATOR_MAX)
++    {
++        FPD_API_RESULT ret = FPD_SetState(getIndicatorID(eIndicator), (bool)state);
++        DEBUG("%s - State = %d, ret = %d\n", __FUNCTION__, state, ret);
++        return mapFPDReturnCodes(ret);
++    }
++    else
++    {
++        return dsERR_INVALID_PARAM;
++    }
++#else
++    return dsERR_OPERATION_NOT_SUPPORTED;
++#endif
++}
++
+ dsError_t dsSetFPColor (dsFPDIndicator_t eIndicator, dsFPDColor_t eColor)
+ {
+ #ifdef HAS_FPD_API_SUPPORT
+@@ -222,10 +273,10 @@
+ 
+     if (eIndicator < dsFPD_INDICATOR_MAX)
+     {
+-        /*printf ("LED[%d] color is changed to colorIndex[%d]\n", eIndicator, eColor);*/
++        DEBUG("LED[%d] color is changed to colorIndex[%d]\n", eIndicator, eColor);
+         FPD_API_RESULT ret = FPD_SetColor(getIndicatorID(eIndicator), getColorID(eColor));
+ 
+-		//printf ("%d : ret value...\n", ret);
++	DEBUG("%d : ret value...\n", ret);
+         return mapFPDReturnCodes(ret);
+ 
+     }
+@@ -242,7 +293,7 @@
+ dsError_t dsSetFPTime (dsFPDTimeFormat_t eTimeFormat, const unsigned int uHour, const unsigned int uMinutes)
+ {
+   
+-#ifdef HAS_FPD_API_SUPPORT
++#if defined(HAS_FPD_API_SUPPORT) && defined(HAS_CLOCK_DISPLAY)
+     FPD_TIME time = FPD_TIME_12_HOUR;
+     unsigned int logHour = uHour;
+ 
+@@ -251,7 +302,7 @@
+         logHour = uHour - 12;
+     }
+ 
+-    printf ("%s time Format used and the time is [%02d:%02d]\n", (eTimeFormat == dsFPD_TIME_12_HOUR ? "12 Hr" : "24 Hr"),logHour,uMinutes);
++    DEBUG("%s time Format used and the time is [%02d:%02d]\n", (eTimeFormat == dsFPD_TIME_12_HOUR ? "12 Hr" : "24 Hr"),logHour,uMinutes);
+ 
+     if (!m_isPlatFpdInitialized)
+         return dsERR_INVALID_STATE;
+@@ -276,8 +327,7 @@
+ 
+ dsError_t dsSetFPText(const char* pText)
+ {
+-   
+-#ifdef HAS_FPD_API_SUPPORT
++#if defined(HAS_FPD_API_SUPPORT) && defined(HAS_CLOCK_DISPLAY)
+     if (!m_isPlatFpdInitialized)
+         return dsERR_INVALID_STATE;
+ 
+@@ -285,7 +335,7 @@
+ 	FPD_API_RESULT ret = FPD_SetText((char *) pText);
+ 
+ 
+-	//printf ("%d : ret value...\n", ret);
++	DEBUG("%d : ret value...\n", ret);
+ 
+     return mapFPDReturnCodes(ret);
+ #else
+@@ -295,14 +345,13 @@
+ 
+ dsError_t dsSetFPScroll(unsigned int uScrollHoldOnDur, unsigned int uHorzScrollIterations, unsigned int uVertScrollIterations)
+ {
+-    
+-#ifdef HAS_FPD_API_SUPPORT
++#if defined(HAS_FPD_API_SUPPORT) && defined(HAS_CLOCK_DISPLAY)
+     if (!m_isPlatFpdInitialized)
+         return dsERR_INVALID_STATE;
+ 
+-     FPD_API_RESULT ret = FPD_SetScroll (uScrollHoldOnDur, uHorzScrollIterations, uVertScrollIterations);
++    FPD_API_RESULT ret = FPD_SetScroll (uScrollHoldOnDur, uHorzScrollIterations, uVertScrollIterations);
+ 
+-	//printf ("%d : ret value...\n", ret);
++    DEBUG("%d : ret value...\n", ret);
+ 
+     return mapFPDReturnCodes(ret);
+ #else
+@@ -314,8 +363,7 @@
+ 
+ dsError_t dsSetFPTextBrightness (dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t eBrightness)
+ {
+-
+-#ifdef HAS_FPD_API_SUPPORT 
++#if defined(HAS_FPD_API_SUPPORT) && defined(HAS_CLOCK_DISPLAY)
+ 	FPD_INDICATOR indicator = FPD_INDICATOR_RFBYPASS;
+ 
+ 	if (!m_isPlatFpdInitialized)
+@@ -326,20 +374,20 @@
+         if (eBrightness > dsFPD_BRIGHTNESS_MAX)
+             return dsERR_INVALID_PARAM;
+ 
+-			switch (eIndicator)
+-			{
+-				case dsFPD_TEXTDISP_TEXT: 
+-					indicator = FPD_INDICATOR_TEXT; 
+-					break;
+-				default: break;
+-			}
++	switch (eIndicator)
++	{
++		case dsFPD_TEXTDISP_TEXT: 
++			indicator = FPD_INDICATOR_TEXT; 
++			break;
++		default: break;
++	}
+ 
+-		/*printf ("LED[%d]-%d brightness = %d\n", eIndicator,indicator, eBrightness);*/
++	DEBUG("LED[%d]-%d brightness = %d\n", eIndicator,indicator, eBrightness);
+ 
+         FPD_API_RESULT ret = FPD_SetBrightness (indicator,eBrightness);
+ 
+-		//printf ("%d : ret value...\n", ret);
+-		return mapFPDReturnCodes(ret);
++        DEBUG("%d : ret value...\n", ret);
++	return mapFPDReturnCodes(ret);
+     }
+     else
+         return dsERR_INVALID_PARAM;
+@@ -352,9 +400,9 @@
+ 
+ dsError_t dsFPEnableCLockDisplay (int enable)
+ {
+-#ifdef HAS_FPD_API_SUPPORT 
++#if defined(HAS_FPD_API_SUPPORT) && defined(HAS_CLOCK_DISPLAY)
+ 	FPD_API_RESULT ret = FPD_clockDisplay(enable);
+-	//printf ("dsSetFPTextDisplay enable = %d\n",enable);
++	DEBUG("dsSetFPTextDisplay enable = %d\n",enable);
+     return mapFPDReturnCodes(ret);
+ #else
+     return dsERR_OPERATION_NOT_SUPPORTED;
+@@ -384,13 +432,13 @@
+         isPlatFpdInitialized = 1;
+     }
+ 
+-    printf("_SetNexusLEDBrightness : RGB Values are %d-%d-%d \r\n",red,green,blue);
++    DEBUG("_SetNexusLEDBrightness : RGB Values are %d-%d-%d \r\n",red,green,blue);
+ 
+     switch (eIndicator)
+     {
+     
+         case dsFPD_INDICATOR_POWER:
+-            printf("NEXUS_Led_SetIndicatorBrightness Power: RGB Values are %d-%d-%d \r\n",red,green,blue);
++            DEBUG("NEXUS_Led_SetIndicatorBrightness Power: RGB Values are %d-%d-%d \r\n",red,green,blue);
+             if (eBrightness > 0)
+             {
+                 powerStatus = 1;
+Index: git/dshallogger.c
+===================================================================
+--- git.orig/dshallogger.c	2017-03-24 21:17:05.858423294 +0900
++++ git/dshallogger.c	2017-03-24 21:17:32.770423802 +0900
+@@ -9,7 +9,7 @@
+     logCb = cb;
+ }
+ 
+-int log(int priority,const char *format, ...)
++int ds_hal_log(int priority,const char *format, ...)
+ {
+     char tmp_buff[MAX_LOG_BUFF];
+     va_list args;
