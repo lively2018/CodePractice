@@ -1,0 +1,47 @@
+1. example
+
+maxtrix[3x2] = { {0,4}, {1,7}, {2,0})
+
+0 4
+1 7
+2 0
+
+0 x
+x 7
+x 0
+
+0 x
+x x 
+x 0
+
+0 0
+0 0
+0 0
+
+1 0 2
+3 2 4
+0 1 0
+
+x 0 x
+3 x 4
+0 x 0
+
+x 0 x
+x x 4
+0 x 0
+
+x 0 x
+x x x 
+0 x 0
+
+F T F
+F F F
+T F T
+
+if( ZeroMatrix[i][j] == true)
+{
+	invalidRow[j]
+	invalidColum[i]
+}
+
+
