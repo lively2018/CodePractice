@@ -1,0 +1,66 @@
+1. example
+
+abc , cba 
+
+choose  a of {c, b, a}
+
+choose  b of {c, b}
+
+choose c of {c }
+
+Can cba be changed to abc? Yes
+
+cba is a permuation of abc.
+
+abc, abb
+
+choose a of { a, b, b}
+
+choose b of { b, b}
+
+Not choose c of {b }
+
+
+Can abb be changed to abc? No
+
+abb isn't permutation of abb
+
+checkPermutation(char *Source, char *Dest, int length, int n)
+{
+	char NewDest[128];
+	int SourcePoint;
+
+	if(n <= 1)
+	{
+		if(*(Source+length-n) == *(Dest))
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		// find the same character
+		if(strchr(*(Source+lenght-n), Dest)== 0)
+		{
+			memset(NewDest, 0x00, sizeof(NewDest));
+			// make the new dest string removing the same character
+			n--;
+			checkPermutation(Source, Dest, length, n); 
+		}
+		else
+		{
+			return 0;
+		}
+	}
+}
+
+If one is a permutation of the other, two of them have the same order.
+sort (one)
+sort (the other)
+compare sorted two string
+
+
