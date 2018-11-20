@@ -1,0 +1,61 @@
+1. example
+
+
+unsorted linked list
+
+1 -> 7 -> 3 -> 8 -> 2 -> 7
+
+pick 1
+
+compare 7 with 1
+
+compare 3 with 1
+
+
+... 
+
+compare 7 with 1
+
+pick 7
+
+compare 3 with 7
+...
+compare 7 with 7
+
+remove 7
+
+1->7->3->8->2
+
+pick 3
+
+compare 8 with 3
+compare 2 with 2
+
+pick 8
+
+compare 2 with 8
+
+find_duplicate(linkedlist head)
+
+node *dest
+if(head->next == NULL)
+{
+	return 0;
+}
+else
+{
+	// find the duplicate
+	for(dest = head->next; dest != NULL; dest=dest->next)
+	{
+		if(dest->data == head->data)
+		{
+			//delete dest node from linked list
+		}
+	}
+	head = head->next;
+	find_duplicate(head);
+}
+	
+
+
+
