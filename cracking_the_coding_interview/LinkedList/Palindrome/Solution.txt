@@ -1,0 +1,21 @@
+example
+
+a-> b->c->e->f
+ <-  <- <- <-
+
+compare a with f
+
+a isn't equal to f
+
+not palindrome
+
+compare the pointer from head with the other pointer from the tail.
+
+if two data aren't same, stop and return false
+
+if two data are same, continue until two pointer meet.
+
+if two pointer meet, return true.
+
+
+

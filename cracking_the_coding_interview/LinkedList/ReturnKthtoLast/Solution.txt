@@ -1,0 +1,18 @@
+example)
+
+a->b->c->d->e->f
+
+return 0th : f
+return 1th : f
+return 6th : a
+return 5th : b
+return 7th : error
+
+go to the last counting the number of elements.
+check k is equal or less than the total number of elements.
+if the total number of element is N
+kth to last element is equal to (N-K)+1 th to the first element.
+the edage cases:   K=0, K=1 
+
+
+
