@@ -1,0 +1,17 @@
+example
+
+a b    1 2   z x
+
+0 ~ n/3-1 n/3 ~ 2n/3-1 2n/3 ~ n-1
+
+push(1, data)
+{
+ push data  to 1st of head 
+}
+pop(1)
+
+peer(1)
+
+push( nth of stack, data)
+pop(nth of stack)
+peer(nth of stack)
