@@ -1,0 +1,32 @@
+example
+
+cat->cat->dog->dog
+
+oldest item: cat 
+latest item: dog 
+
+head : first item
+tail: last item
+
+enqueue dog
+
+cat->cat->dog->dog->dog
+
+dequeue Any 
+return cat
+
+cat->dog->dog->dog
+
+dequeueDog
+cat->dog->dog
+return dog
+
+
+dequeueCat
+return cat
+dog->dog
+
+
+
+
+
