@@ -17,27 +17,32 @@ void checkMagazine(int magazine_count, char** magazine, int note_count, char** n
     int result = 1;
     char * mag_str;
     char * note_str;
+	int i, j;
     count = malloc(sizeof(int) * note_count);
     assert(count != NULL);
-    for(int i = 0; i < note_count; i++)
+    for(i = 0; i < note_count; i++)
     {
         *(count + i) = 0; 
     }
 
-    for(int i = 0; i < note_count; i++)
+   for(i = 0; i < note_count; i++)
     {
-        for(int j = 0; j < magazine_count; j++)
+        for(j = 0; j < magazine_count; j++)
         {
-            mag_str = *(magzine + j);
+            mag_str = *(magazine + j);
             note_str = *(note + i);
-            if(strcmp(mag_str, *(note + i)) == 0)
+			printf("mag_str:%s\n", mag_str);
+			printf("note_str:%s\n", note_str);
+            if(strcmp(mag_str, note_str) == 0)
             {
                 *(count + i) = 1;
             }
+
         } 
     }
 
-    for(int i; i < note_count; i++)
+
+    for(i; i < note_count; i++)
     {
         result &= *(count + i);
     }
@@ -55,7 +60,7 @@ void checkMagazine(int magazine_count, char** magazine, int note_count, char** n
 int main()
 {
     char** mn = split_string(readline());
-
+	int i;
     char* m_endptr;
     char* m_str = mn[0];
     int m = strtol(m_str, &m_endptr, 10);
@@ -72,7 +77,7 @@ int main()
 
     char** magazine = malloc(m * sizeof(char*));
 
-    for (int i = 0; i < m; i++) {
+    for (i = 0; i < m; i++) {
         char* magazine_item = *(magazine_temp + i);
 
         *(magazine + i) = magazine_item;
@@ -84,7 +89,7 @@ int main()
 
     char** note = malloc(n * sizeof(char*));
 
-    for (int i = 0; i < n; i++) {
+    for ( i = 0; i < n; i++) {
         char* note_item = *(note_temp + i);
 
         *(note + i) = note_item;
