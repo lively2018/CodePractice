@@ -1,4 +1,4 @@
-binaries = myfirst  fleas yourcat sqrt ourfunc limits hexoct convert exceed chartype morechar floatnum
+binaries = myfirst  fleas yourcat sqrt ourfunc limits hexoct convert exceed chartype morechar floatnum strings instr3 address
 clean: 
 	rm  ${binaries} *.o
 myfirst: myfirst.o
@@ -48,4 +48,16 @@ morechar.o: morechar.cpp
 floatnum: floatnum.o
 	g++ -o $@ $^
 floatnum.o: floatnum.cpp
+	g++ -c -g $^
+strings: strings.o
+	g++ -o $@ $^
+stinrgs.o: strings.cpp
+	g++ -c -g $^
+instr3: instr3.o
+	g++ -o $@ $^
+instr3.o: instr3.cpp
+	g++ -c -g $^
+address: address.o
+	g++ -o $@ $^
+address.o: address.cpp
 	g++ -c -g $^
